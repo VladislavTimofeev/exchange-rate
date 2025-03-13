@@ -36,21 +36,25 @@ public class ExchangeRateService {
     public void fetchExchangeRateAndSave() {
         try {
             ExchangeRateResponse exchangeRateResponse = externalExchangeRateApi.getExchangeRate(apiKey);
-            if (exchangeRateResponse.isSuccess()) {
-                exchangeRatesMap.clear();
-                exchangeRatesMap.putAll(exchangeRateResponse.getRates());
-                exchangeRateResponse.getRates().forEach((code, rate) -> {
-                    Currency currency = currencyRepository.findByCode(code)
-                            .orElse(new Currency(null, code, code, rate, null));
-                    currency.setRate(rate);
-                    currencyRepository.save(currency);
-                });
-                System.out.println("Exchange rates fetched successfully");
-            } else {
-                System.out.println("Exchange rates fetching failed" + exchangeRateResponse);
-            }
+            checkExchangeRateResponse(exchangeRateResponse);
         } catch (Exception e) {
             System.err.println("Exchange rates fetching failed" + e.getMessage());
+        }
+    }
+
+    private void checkExchangeRateResponse(ExchangeRateResponse exchangeRateResponse) {
+        if (exchangeRateResponse.isSuccess()) {
+            exchangeRatesMap.clear();
+            exchangeRatesMap.putAll(exchangeRateResponse.getRates());
+            exchangeRateResponse.getRates().forEach((code, rate) -> {
+                Currency currency = currencyRepository.findByCode(code)
+                        .orElse(new Currency(null, code, code, rate, null));
+                currency.setRate(rate);
+                currencyRepository.save(currency);
+            });
+            System.out.println("Exchange rates fetched successfully");
+        } else {
+            System.out.println("Exchange rates fetching failed" + exchangeRateResponse);
         }
     }
 }
