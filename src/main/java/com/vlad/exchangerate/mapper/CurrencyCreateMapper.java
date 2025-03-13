@@ -8,14 +8,14 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CurrencyCreateMapper implements Mapper<CurrencyDto, Currency> {
-
     @Override
     public Currency map(CurrencyDto object) {
         return new Currency(
                 null,
                 object.getCode(),
                 object.getName(),
-                object.getRate()
+                object.getRate(),
+                null
         );
     }
 }

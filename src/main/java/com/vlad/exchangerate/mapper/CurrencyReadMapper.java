@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CurrencyReadMapper implements Mapper<Currency, CurrencyDto> {
-
     @Override
     public CurrencyDto map(Currency object) {
         return new CurrencyDto(
