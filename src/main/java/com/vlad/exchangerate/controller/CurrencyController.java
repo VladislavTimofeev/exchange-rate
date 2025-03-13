@@ -1,7 +1,9 @@
 package com.vlad.exchangerate.controller;
 
 import com.vlad.exchangerate.dto.CurrencyDto;
+import com.vlad.exchangerate.dto.ExchangeRateResponse;
 import com.vlad.exchangerate.service.CurrencyService;
+import com.vlad.exchangerate.service.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,13 +15,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("api/currencies")
+@RequestMapping("/api/currencies")
 @RequiredArgsConstructor
 public class CurrencyController {
     private final CurrencyService currencyService;
+    private final ExchangeRateService exchangeRateService;
+
+    @GetMapping("/fetch")
+    public ResponseEntity<ExchangeRateResponse> fetchRates() {
+        return ResponseEntity.ok(exchangeRateService.fetchExchangeRate());
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<Map<String, BigDecimal>> getCurrentRates() {
+        return ResponseEntity.ok(exchangeRateService.getExchangeRatesMap());
+    }
 
     @GetMapping
     public ResponseEntity<List<CurrencyDto>> getCurrencies() {
