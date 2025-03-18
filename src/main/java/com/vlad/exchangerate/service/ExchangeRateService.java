@@ -1,11 +1,13 @@
 package com.vlad.exchangerate.service;
 
 import com.vlad.exchangerate.client.ExternalExchangeRateApi;
+import com.vlad.exchangerate.config.ExternalApiConfig;
 import com.vlad.exchangerate.dto.ExchangeRateResponse;
 import com.vlad.exchangerate.entity.Currency;
+import com.vlad.exchangerate.exception.ExchangeRateFetchException;
 import com.vlad.exchangerate.repository.CurrencyRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,17 +17,21 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExchangeRateService {
 
     private final ExternalExchangeRateApi externalExchangeRateApi;
     private final CurrencyRepository currencyRepository;
     private final Map<String, BigDecimal> exchangeRatesMap = new HashMap<>();
-
-    @Value("${exchange.api.key}")
-    private String apiKey;
+    private final ExternalApiConfig externalApiConfig;
 
     public ExchangeRateResponse fetchExchangeRate() {
-        return externalExchangeRateApi.getExchangeRate(apiKey);
+        try {
+            return externalExchangeRateApi.getExchangeRate(externalApiConfig.getApiKey());
+        } catch (Exception e){
+            log.error("Failed to fetch exchange rate: {}", e.getMessage());
+            throw new ExchangeRateFetchException("Failed to fetch exchange rate", e);
+        }
     }
 
     public Map<String, BigDecimal> getExchangeRatesMap() {
@@ -35,26 +41,33 @@ public class ExchangeRateService {
     @Scheduled(fixedRate = 600000)
     public void fetchExchangeRateAndSave() {
         try {
-            ExchangeRateResponse exchangeRateResponse = externalExchangeRateApi.getExchangeRate(apiKey);
+            log.info("Fetching exchange rates...");
+            ExchangeRateResponse exchangeRateResponse = externalExchangeRateApi.getExchangeRate(externalApiConfig.getApiKey());
             checkExchangeRateResponse(exchangeRateResponse);
         } catch (Exception e) {
-            System.err.println("Exchange rates fetching failed" + e.getMessage());
+            log.error("Error occurred while fetching exchange rates: {}", e.getMessage());
         }
     }
 
     private void checkExchangeRateResponse(ExchangeRateResponse exchangeRateResponse) {
         if (exchangeRateResponse.isSuccess()) {
-            exchangeRatesMap.clear();
-            exchangeRatesMap.putAll(exchangeRateResponse.getRates());
-            exchangeRateResponse.getRates().forEach((code, rate) -> {
-                Currency currency = currencyRepository.findByCode(code)
-                        .orElse(new Currency(null, code, code, rate, null));
-                currency.setRate(rate);
-                currencyRepository.save(currency);
-            });
-            System.out.println("Exchange rates fetched successfully");
+            updateExchangeRates(exchangeRateResponse.getRates());
+            log.info("Exchange rates fetched and saved successfully.");
         } else {
-            System.out.println("Exchange rates fetching failed" + exchangeRateResponse);
+            log.warn("Failed to fetch exchange rates: {}", exchangeRateResponse);
         }
+    }
+
+    private void updateExchangeRates(Map<String, BigDecimal> rates){
+        exchangeRatesMap.clear();
+        exchangeRatesMap.putAll(rates);
+
+        rates.forEach((code, rate)->{
+            Currency currency = currencyRepository.findByCode(code)
+                    .orElse(new Currency(null, code, code, rate, null));
+
+            currency.setRate(rate);
+            currencyRepository.save(currency);
+        });
     }
 }
