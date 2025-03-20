@@ -1,10 +1,10 @@
 package com.vlad.exchangerate.exception;
 
-public class ExchangeRateFetchException extends RuntimeException{
+public class ResourceNotFoundException extends RuntimeException{
 
     private final ErrorCode errorCode;
 
-    public ExchangeRateFetchException(ErrorCode errorCode) {
+    public ResourceNotFoundException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }

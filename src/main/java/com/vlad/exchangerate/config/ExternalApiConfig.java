@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Configuration;
 public class ExternalApiConfig {
     private String url;
     private String apiKey;
+    private String scheduledFixedRate;
 }
