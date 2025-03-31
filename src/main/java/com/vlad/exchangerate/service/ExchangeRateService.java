@@ -7,6 +7,8 @@ import java.util.Map;
 
 public interface ExchangeRateService {
     ExchangeRateResponse fetchExchangeRate();
+
     Map<String, BigDecimal> getExchangeRatesMap();
+
     void fetchExchangeRateAndSave();
 }

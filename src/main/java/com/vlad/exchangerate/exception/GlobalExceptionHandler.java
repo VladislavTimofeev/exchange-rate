@@ -16,8 +16,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 
-    @ExceptionHandler(CurrencyRateException.class)
-    public ResponseEntity<String> handleInvalidCurrencyRate(CurrencyRateException ex) {
+    @ExceptionHandler(CurrencyException.class)
+    public ResponseEntity<String> handleInvalidCurrencyRate(CurrencyException ex) {
         log.warn("Invalid currency rate: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }

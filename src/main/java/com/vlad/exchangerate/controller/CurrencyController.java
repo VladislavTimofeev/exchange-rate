@@ -3,8 +3,8 @@ package com.vlad.exchangerate.controller;
 import com.vlad.exchangerate.dto.CurrencyRequest;
 import com.vlad.exchangerate.dto.CurrencyResponse;
 import com.vlad.exchangerate.dto.ExchangeRateResponse;
-import com.vlad.exchangerate.service.impl.CurrencyFacadeImpl;
-import com.vlad.exchangerate.service.impl.ExchangeRateServiceImpl;
+import com.vlad.exchangerate.service.CurrencyFacade;
+import com.vlad.exchangerate.service.ExchangeRateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +28,12 @@ import java.util.Map;
 @Slf4j
 public class CurrencyController {
 
-    private final ExchangeRateServiceImpl exchangeRateServiceImpl;
-    private final CurrencyFacadeImpl currencyFacadeImpl;
+    private final ExchangeRateService exchangeRateService;
+    private final CurrencyFacade currencyFacade;
 
     @GetMapping
     public ResponseEntity<List<CurrencyResponse>> getAllCurrencies() {
-        List<CurrencyResponse> currencies = currencyFacadeImpl.getAllCurrencies();
+        List<CurrencyResponse> currencies = currencyFacade.getAllCurrencies();
         if (currencies.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -42,25 +42,25 @@ public class CurrencyController {
 
     @GetMapping("/rate")
     public ResponseEntity<CurrencyResponse> getCurrencyByCode(@RequestParam("code") String code) {
-        CurrencyResponse currencyResponse = currencyFacadeImpl.getCurrencyByCode(code);
+        CurrencyResponse currencyResponse = currencyFacade.getCurrencyByCode(code);
         return ResponseEntity.ok(currencyResponse);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CurrencyResponse createCurrency(@Valid @RequestBody CurrencyRequest currencyRequest) {
-        return currencyFacadeImpl.saveCurrency(currencyRequest);
+        return currencyFacade.saveCurrency(currencyRequest);
     }
 
     @GetMapping("/fetch-rates")
     public ResponseEntity<ExchangeRateResponse> fetchRates() {
-        ExchangeRateResponse response = exchangeRateServiceImpl.fetchExchangeRate();
+        ExchangeRateResponse response = exchangeRateService.fetchExchangeRate();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/current-exchange-rates")
     public ResponseEntity<Map<String, BigDecimal>> getCurrentRates() {
-        Map<String, BigDecimal> rates = exchangeRateServiceImpl.getExchangeRatesMap();
+        Map<String, BigDecimal> rates = exchangeRateService.getExchangeRatesMap();
         if (rates.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

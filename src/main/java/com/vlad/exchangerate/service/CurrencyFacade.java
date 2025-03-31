@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface CurrencyFacade {
     List<CurrencyResponse> getAllCurrencies();
+
     CurrencyResponse getCurrencyByCode(String code);
+
     CurrencyResponse saveCurrency(CurrencyRequest currencyRequest);
 }

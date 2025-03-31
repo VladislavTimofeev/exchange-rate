@@ -31,7 +31,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     public ExchangeRateResponse fetchExchangeRate() {
         try {
             return externalExchangeRateApi.getExchangeRate(externalApiConfig.getApiKey());
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Failed to fetch exchange rate: {}", e.getMessage());
             throw new ExchangeRateFetchException(ErrorCode.EXCHANGE_RATE_FETCH_FAILED);
         }
@@ -43,7 +43,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     }
 
     @Override
-    @Scheduled(fixedRateString = "${external.provider.exchange-rates-api.scheduledFixedRate}")
+    @Scheduled(fixedRateString = "${app.scheduled-tasks.apiUpdateInterval}")
     public void fetchExchangeRateAndSave() {
         try {
             log.info("Fetching exchange rates...");
@@ -63,13 +63,17 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
         }
     }
 
-    private void updateExchangeRates(Map<String, BigDecimal> rates){
+    private void updateExchangeRates(Map<String, BigDecimal> rates) {
         exchangeRatesMap.clear();
         exchangeRatesMap.putAll(rates);
 
-        rates.forEach((code, rate)->{
+        rates.forEach((code, rate) -> {
             Currency currency = currencyRepository.findByCode(code)
-                    .orElse(new Currency(null, code, code, rate, null));
+                    .orElse(Currency.builder()
+                            .code(code)
+                            .name(code)
+                            .rate(rate)
+                            .build());
 
             currency.setRate(rate);
             currencyRepository.save(currency);

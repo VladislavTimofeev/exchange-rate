@@ -7,5 +7,6 @@ import java.util.Optional;
 
 public interface CurrencyReadService {
     List<Currency> getAllCurrencies();
+
     Optional<Currency> getCurrencyByCode(String code);
 }

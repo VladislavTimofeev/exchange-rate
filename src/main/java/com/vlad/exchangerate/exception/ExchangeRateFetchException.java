@@ -1,6 +1,6 @@
 package com.vlad.exchangerate.exception;
 
-public class ExchangeRateFetchException extends RuntimeException{
+public class ExchangeRateFetchException extends RuntimeException {
 
     private final ErrorCode errorCode;
 

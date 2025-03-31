@@ -12,5 +12,6 @@ public interface CurrencyMapper {
     CurrencyMapper INSTANCE = Mappers.getMapper(CurrencyMapper.class);
 
     Currency toEntity(CurrencyRequest currencyRequest);
+
     CurrencyResponse toResponse(Currency currency);
 }
