@@ -29,11 +29,10 @@ public class CurrencyReadServiceImpl implements CurrencyReadService {
     @Override
     public Optional<Currency> getCurrencyByCode(String code) {
         log.info("Fetching currency with code: {}", code);
-        Optional<Currency> currency = currencyRepository.findByCode(code);
-        currency.ifPresentOrElse(
-                c -> log.info("Currency with code {} found", code),
-                () -> log.warn("Currency with code {} not found", code)
-        );
-        return currency;
+        return currencyRepository.findByCode(code)
+                .map(currency -> {
+                    log.info("Currency with code {} found", code);
+                    return currency;
+                });
     }
 }

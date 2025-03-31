@@ -1,6 +1,7 @@
 package com.vlad.exchangerate.controller;
 
-import com.vlad.exchangerate.dto.CurrencyDto;
+import com.vlad.exchangerate.dto.CurrencyRequest;
+import com.vlad.exchangerate.dto.CurrencyResponse;
 import com.vlad.exchangerate.dto.ExchangeRateResponse;
 import com.vlad.exchangerate.service.impl.CurrencyFacadeImpl;
 import com.vlad.exchangerate.service.impl.ExchangeRateServiceImpl;
@@ -31,8 +32,8 @@ public class CurrencyController {
     private final CurrencyFacadeImpl currencyFacadeImpl;
 
     @GetMapping
-    public ResponseEntity<List<CurrencyDto>> getAllCurrencies() {
-        List<CurrencyDto> currencies = currencyFacadeImpl.getAllCurrencies();
+    public ResponseEntity<List<CurrencyResponse>> getAllCurrencies() {
+        List<CurrencyResponse> currencies = currencyFacadeImpl.getAllCurrencies();
         if (currencies.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -40,15 +41,15 @@ public class CurrencyController {
     }
 
     @GetMapping("/rate")
-    public ResponseEntity<CurrencyDto> getCurrencyByCode(@RequestParam("code") String code) {
-        CurrencyDto currencyDto = currencyFacadeImpl.getCurrencyByCode(code);
-        return ResponseEntity.ok(currencyDto);
+    public ResponseEntity<CurrencyResponse> getCurrencyByCode(@RequestParam("code") String code) {
+        CurrencyResponse currencyResponse = currencyFacadeImpl.getCurrencyByCode(code);
+        return ResponseEntity.ok(currencyResponse);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CurrencyDto createCurrency(@Valid @RequestBody CurrencyDto currencyDto) {
-        return currencyFacadeImpl.saveCurrency(currencyDto);
+    public CurrencyResponse createCurrency(@Valid @RequestBody CurrencyRequest currencyRequest) {
+        return currencyFacadeImpl.saveCurrency(currencyRequest);
     }
 
     @GetMapping("/fetch-rates")

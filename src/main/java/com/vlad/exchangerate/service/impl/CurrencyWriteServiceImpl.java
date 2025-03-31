@@ -1,9 +1,10 @@
 package com.vlad.exchangerate.service.impl;
 
+import com.vlad.exchangerate.dto.CurrencyRequest;
 import com.vlad.exchangerate.entity.Currency;
 import com.vlad.exchangerate.exception.CurrencyException;
 import com.vlad.exchangerate.exception.ErrorCode;
-import com.vlad.exchangerate.exception.CurrencyRateException;
+import com.vlad.exchangerate.mapper.CurrencyMapper;
 import com.vlad.exchangerate.repository.CurrencyRepository;
 import com.vlad.exchangerate.service.CurrencyWriteService;
 import jakarta.validation.Valid;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -21,21 +21,19 @@ import java.math.BigDecimal;
 public class CurrencyWriteServiceImpl implements CurrencyWriteService {
 
     private final CurrencyRepository currencyRepository;
+    private final CurrencyMapper currencyMapper;
 
     @Override
-    public Currency save(@Valid Currency currency) {
-        log.info("Saving currency with code: {}", currency.getCode());
+    public Currency save(@Valid CurrencyRequest currencyRequest) {
+        log.info("Saving currency with code: {}", currencyRequest.getCode());
 
-        currencyRepository.findByCode(currency.getCode())
+        currencyRepository.findByCode(currencyRequest.getCode())
                 .ifPresent(existingCurrency -> {
-            log.warn("Currency with code {} already exists", currency.getCode());
-            throw new CurrencyException(ErrorCode.CURRENCY_ALREADY_EXISTS);
-        });
+                    log.warn("Currency with code {} already exists", currencyRequest.getCode());
+                    throw new CurrencyException(ErrorCode.CURRENCY_ALREADY_EXISTS);
+                });
 
-        if (currency.getRate() == null || currency.getRate().compareTo(BigDecimal.ZERO) <= 0) {
-            log.warn("Invalid currency rate for {}: {}", currency.getCode(), currency.getRate());
-            throw new CurrencyRateException(ErrorCode.INVALID_CURRENCY_RATE);
-        }
+        Currency currency = currencyMapper.toEntity(currencyRequest);
 
         try {
             Currency savedCurrency = currencyRepository.save(currency);
