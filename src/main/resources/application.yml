@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: exchange-rate
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/exchange
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+external:
+  provider:
+    exchange-rates-api:
+      key: 14c1d335d2144f1b460365644575ffc4
+      url: https://api.exchangeratesapi.io/v1
+
+app:
+  scheduled-tasks:
+    apiUpdateInterval: 600000

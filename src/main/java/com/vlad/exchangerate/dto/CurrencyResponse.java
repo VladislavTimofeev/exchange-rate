@@ -5,7 +5,7 @@ import lombok.Value;
 import java.math.BigDecimal;
 
 @Value
-public class CurrencyDto {
+public class CurrencyResponse {
     String code;
     String name;
     BigDecimal rate;
