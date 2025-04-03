@@ -1,8 +1,8 @@
 package com.vlad.exchangerate.controller;
 
-import com.vlad.exchangerate.dto.CurrencyDto;
+import com.vlad.exchangerate.dto.CurrencyRequest;
+import com.vlad.exchangerate.dto.CurrencyResponse;
 import com.vlad.exchangerate.dto.ExchangeRateResponse;
-import com.vlad.exchangerate.exception.ExchangeRateFetchException;
 import com.vlad.exchangerate.service.CurrencyFacade;
 import com.vlad.exchangerate.service.ExchangeRateService;
 import jakarta.validation.Valid;
@@ -32,62 +32,38 @@ public class CurrencyController {
     private final CurrencyFacade currencyFacade;
 
     @GetMapping
-    public ResponseEntity<List<CurrencyDto>> getAllCurrencies() {
-        log.info("Fetching all currencies...");
-        List<CurrencyDto> currencies = currencyFacade.getAllCurrencies();
+    public ResponseEntity<List<CurrencyResponse>> getAllCurrencies() {
+        List<CurrencyResponse> currencies = currencyFacade.getAllCurrencies();
         if (currencies.isEmpty()) {
-            log.warn("No currencies found");
             return ResponseEntity.noContent().build();
         }
-        log.info("Fetched {} currencies", currencies.size());
         return ResponseEntity.ok(currencies);
     }
 
     @GetMapping("/rate")
-    public ResponseEntity<CurrencyDto> getCurrencyByCode(@RequestParam("code") String code) {
-        log.info("Fetching currency with code: {}", code);
-        return currencyFacade.getCurrencyByCode(code)
-                .map(currencyDto -> {
-                    log.info("Currency with code {} found", code);
-                    return ResponseEntity.ok(currencyDto);
-                })
-                .orElseGet(() -> {
-                    log.warn("Currency with code {} not found", code);
-                    return ResponseEntity.notFound().build();
-                });
+    public ResponseEntity<CurrencyResponse> getCurrencyByCode(@RequestParam("code") String code) {
+        CurrencyResponse currencyResponse = currencyFacade.getCurrencyByCode(code);
+        return ResponseEntity.ok(currencyResponse);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CurrencyDto createCurrency(@Valid @RequestBody CurrencyDto currencyDto) {
-        log.info("Creating currency with code: {}", currencyDto.getCode());
-        CurrencyDto createdCurrency = currencyFacade.saveCurrency(currencyDto);
-        log.info("Currency with code {} created successfully", currencyDto.getCode());
-        return createdCurrency;
+    public CurrencyResponse createCurrency(@Valid @RequestBody CurrencyRequest currencyRequest) {
+        return currencyFacade.saveCurrency(currencyRequest);
     }
 
-    @GetMapping("/fetch")
+    @GetMapping("/fetch-rates")
     public ResponseEntity<ExchangeRateResponse> fetchRates() {
-        try {
-            log.info("Fetching exchange rates...");
-            ExchangeRateResponse response = exchangeRateService.fetchExchangeRate();
-            log.info("Successfully fetched exchange rates");
-            return ResponseEntity.ok(response);
-        } catch (ExchangeRateFetchException e) {
-            log.error("Failed to fetch exchange rates: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        ExchangeRateResponse response = exchangeRateService.fetchExchangeRate();
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/current")
+    @GetMapping("/current-exchange-rates")
     public ResponseEntity<Map<String, BigDecimal>> getCurrentRates() {
-        log.info("Fetching current exchange rates...");
         Map<String, BigDecimal> rates = exchangeRateService.getExchangeRatesMap();
         if (rates.isEmpty()) {
-            log.warn("No exchange rates available");
             return ResponseEntity.noContent().build();
         }
-        log.info("Fetched {} exchange rates", rates.size());
         return ResponseEntity.ok(rates);
     }
 }

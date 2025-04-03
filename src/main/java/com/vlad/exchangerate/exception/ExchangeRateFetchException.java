@@ -1,20 +1,15 @@
 package com.vlad.exchangerate.exception;
 
-public class ExchangeRateFetchException extends RuntimeException{
+public class ExchangeRateFetchException extends RuntimeException {
 
-    public ExchangeRateFetchException() {
-        super("Failed to fetch exchange rate");
+    private final ErrorCode errorCode;
+
+    public ExchangeRateFetchException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 
-    public ExchangeRateFetchException(String message) {
-        super(message);
-    }
-
-    public ExchangeRateFetchException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ExchangeRateFetchException(Throwable cause) {
-        super(cause);
+    public String getErrorCode() {
+        return errorCode.getCode();
     }
 }
